@@ -1,0 +1,70 @@
+﻿Facultad de Ingeniería y Ciencias Básicas
+Programa de Ingeniería de Sistemas - Diurno
+	Ingeniería de Sw II – G1
+	Proyecto semestral
+	Grupo: 
+	Periodo: 2026-1S
+	
+
+
+
+Actividad – Lineamientos generales
+
+
+Enunciado Propuesto
+Práctica Semestral: Sistema de Gestión de Reservas para Hotel Boutique (24 Habitaciones)
+Los estudiantes, en equipos de 3-4 integrantes, desarrollarán un sistema web full-stack para la gestión completa de reservas en un hotel con 24 habitaciones (categorizadas en estándar, suite y familiar). La práctica se extenderá todo el semestre (16 semanas), dividida en 5 sprints de 3 semanas cada uno, con entregas obligatorias y revisiones en clase.
+Requisitos Funcionales Principales:
+* Registro y login de usuarios (huéspedes, recepcionistas, administradores) con roles diferenciados.
+* Búsqueda y reserva de habitaciones: Disponibilidad en tiempo real por fechas, tipo de habitación, número de huéspedes y preferencias (vista, piso).
+* Gestión de reservas: Confirmación, modificación, cancelación (con políticas de penalización), check-in/check-out y facturación.
+* Panel administrativo: Reportes de ocupación diaria/semanal, ingresos por período, lista de huéspedes y notificaciones automáticas (email/SMS vía APIs gratuitas).
+* Integración con calendario: Vista de calendario mensual con colores para estados (libre, reservada, ocupada, mantenimiento).
+Requisitos No Funcionales:
+* Interfaz responsive y accesible (WCAG 2.1), optimizada para móviles considerando el uso en Colombia.
+* Seguridad: Encriptación de datos personales (PII), JWT para autenticación, prevención de ataques comunes (SQLi, XSS).
+* Despliegue en plataforma gratuita (Railway, Vercel o Render) con BD relacional (PostgreSQL).
+* Control de versiones con Git (GitHub), código modular, pruebas unitarias/integración (>70% cobertura) y documentación UML.
+* Rendimiento: Soporte para hasta 100 reservas concurrentes simuladas.
+
+
+Estructura Semestral
+Sprint 1: Análisis y Planificación (Semanas 1-3)
+* Levantamiento de requisitos vía entrevistas simuladas con "stakeholders" (hotelero ficticio).
+* Diagramas UML (casos de uso, clases, secuencia) y backlog de historias de usuario.
+* Entrega: Documento de especificaciones y wireframes (Figma).
+Sprint 2: Backend y Base de Datos (Semanas 4-6)
+* API RESTful (Node.js/Express o Laravel) con endpoints para habitaciones y reservas.
+* Diseño de BD (diagrama ER con 24 habitaciones pre-cargadas).
+* Entrega: API probada con Postman y base de datos funcional.
+Sprint 3: Frontend e Integración (Semanas 7-9)
+* UI/UX con React o Vue.js, incluyendo calendario interactivo (FullCalendar).
+* Conexión full-stack y manejo de estados de habitaciones.
+* Entrega: Prototipo usable desplegado con demo.
+Sprint 4: Pruebas y Optimizaciones (Semanas 10-12)
+* Pruebas automatizadas (Jest, Cypress) y carga (simulación de picos turísticos).
+* Mejoras basadas en retroalimentación: Reportes PDF y notificaciones.
+* Entrega: Métricas de calidad y corrección de bugs.
+Sprint 5: Despliegue y Presentación (Semanas 13-16)
+* Producción final con monitoreo (logs), manual de usuario y guía de mantenimiento.
+* Video demo (3 min) y presentación oral (10 min/equipo).
+* Entrega: Repositorio completo y autoevaluación de equipo (roles Scrum).
+
+
+Evaluación (100 puntos)
+Criterio
+	Peso
+	Detalles
+	Avance iterativo
+	40%
+	Puntualidad en entregas y daily stand-ups.
+	Calidad del software
+	30%
+	Funcionalidad, código limpio, pruebas y despliegue.
+	Colaboración
+	15%
+	Commits distribuidos, resolución de conflictos y roles claros.
+	Innovación y defensa
+	15%
+	Extras (ej. recomendaciones IA de habitaciones) y exposición.
+	Esta práctica se alinea con los estándares ACM/IEEE para Ingeniería de Software y el contexto colombiano (integración con pasarelas de pago como PayU opcional). Puedes adaptarla a herramientas locales o énfasis en turismo sostenible.
