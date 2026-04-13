@@ -41,14 +41,56 @@ export const login = async (req: Request, res: Response) => {
 
 export const getProfile = async (req: any, res: Response) => {
     try {
-        const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', req.user.id)
-            .single();
+        const { id, email, user_metadata } = req.user;
+        res.json({
+            id,
+            email,
+            full_name: user_metadata?.full_name || '',
+            role: user_metadata?.role || 'guest',
+        });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+export const updateProfile = async (req: any, res: Response) => {
+    const { full_name } = req.body;
+
+    if (!full_name || typeof full_name !== 'string' || full_name.trim().length === 0) {
+        return res.status(400).json({ error: 'full_name is required' });
+    }
+
+    try {
+        const { data, error } = await supabase.auth.admin.updateUserById(req.user.id, {
+            data: { full_name: full_name.trim() }
+        });
 
         if (error) throw error;
-        res.json(data);
+        res.json({
+            id: data.user.id,
+            email: data.user.email,
+            full_name: data.user.user_metadata?.full_name,
+            role: data.user.user_metadata?.role || 'guest',
+        });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+export const updatePassword = async (req: any, res: Response) => {
+    const { newPassword } = req.body;
+
+    if (!newPassword || newPassword.length < 8) {
+        return res.status(400).json({ error: 'Password must be at least 8 characters' });
+    }
+
+    try {
+        const { error } = await supabase.auth.admin.updateUserById(req.user.id, {
+            password: newPassword
+        });
+
+        if (error) throw error;
+        res.json({ message: 'Password updated successfully' });
     } catch (error: any) {
         res.status(500).json({ error: error.message });
     }

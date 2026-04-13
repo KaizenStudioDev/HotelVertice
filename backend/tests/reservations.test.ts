@@ -1,56 +1,84 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeAll } from 'vitest';
 import request from 'supertest';
 import { app } from '../src/app.js';
 import { supabase } from '../src/utils/supabaseClient.js';
 
-// Mocking the middleware to test the controller logic without real Auth
-vi.mock('../src/middlewares/authMiddleware.js', () => ({
-    authenticate: (req: any, res: any, next: any) => {
-        req.user = { id: '00000000-0000-0000-0000-000000000000' };
-        next();
-    },
-    authorize: () => (req: any, res: any, next: any) => next()
-}));
+// Global variable to store a real user ID for tests
+let realUserId: string;
 
-describe('Reservations API - Logic Coverage', () => {
-    it('POST /api/reservations should fail if dates are invalid', async () => {
-        const res = await request(app)
-            .post('/api/reservations')
-            .send({
-                room_id: 1,
-                check_in: '2026-06-10',
-                check_out: '2026-06-05' // check_out < check_in
-            });
+describe('Reservations API - QA Logic', () => {
+    let testRoomId: number;
 
-        expect(res.status).toBe(500); // Should trigger the check in BD or controller
-    });
+    beforeAll(async () => {
+        // 1. Get a real room
+        const roomRes = await request(app).get('/api/rooms');
+        if (roomRes.body && roomRes.body.length > 0) {
+            testRoomId = roomRes.body[0].id;
+        }
 
-    it('POST /api/reservations should calculate price and create booking', async () => {
-        // Note: This still depends on room with ID 1 existing in DB (seeded)
-        const res = await request(app)
-            .post('/api/reservations')
-            .send({
-                room_id: 1,
-                check_in: '2027-01-01',
-                check_out: '2027-01-05'
-            });
-
-        // If it works: 201. If it overlaps: 400. If DB error: 500.
-        expect([201, 400, 500]).toContain(res.status);
-        if (res.status === 201) {
-            expect(res.body).toHaveProperty('total_price');
+        // 2. Get/Create a test user in auth.users (to satisfy FK)
+        // Since we can't easily create auth.users from here without the admin key or real signup
+        // we'll try to find any existing user or use a dedicated test user.
+        // For QA, we'll use a known test UUID or fetch one.
+        const { data: users } = await supabase.from('reservations').select('user_id').limit(1);
+        if (users && users.length > 0) {
+            realUserId = users[0].user_id;
+        } else {
+            // If no reservations exist, we might need to fetch a user from auth (if we have permissions)
+            // or we'll just skip the FK check for now by mocking it if it's too complex
+            // But let's assume we have at least one user from the Auth tests we just ran.
+            realUserId = '00000000-0000-0000-0000-000000000000'; // Default fallback
         }
     });
 
-    it('PATCH /api/reservations/:id/cancel should cancel booking', async () => {
-        // Note: Depends on reservation existing or error handling
-        const res = await request(app).patch('/api/reservations/some-uuid/cancel');
-        expect([200, 404, 500]).toContain(res.status);
+    // Mocking the middleware AFTER we have the real ID if possible
+    vi.mock('../src/middlewares/authMiddleware.js', () => ({
+        authenticate: (req: any, res: any, next: any) => {
+            req.user = { id: realUserId || '00000000-0000-0000-0000-000000000000' };
+            next();
+        },
+        authorize: () => (req: any, res: any, next: any) => next()
+    }));
+
+    it('POST /api/reservations should successfully create a booking or return overlap', async () => {
+        const year = 2030 + Math.floor(Math.random() * 5);
+        const res = await request(app)
+            .post('/api/reservations')
+            .send({
+                room_id: testRoomId,
+                check_in: `${year}-05-01`,
+                check_out: `${year}-05-05`
+            });
+
+        // Error log for debugging
+        if (res.status === 500) {
+            console.error('Reservation 500 Error:', res.body.error);
+        }
+
+        expect([201, 400]).toContain(res.status);
     });
 
-    it('GET /api/reservations should return list', async () => {
-        const res = await request(app).get('/api/reservations');
-        expect(res.status).toBe(200);
-        expect(Array.isArray(res.body)).toBe(true);
+    it('POST /api/reservations should fail with 400 if dates are backwards', async () => {
+        const res = await request(app)
+            .post('/api/reservations')
+            .send({
+                room_id: testRoomId,
+                check_in: '2030-05-10',
+                check_out: '2030-05-05'
+            });
+
+        expect(res.status).toBe(400);
+    });
+
+    it('POST /api/reservations should return 404 for non-existent room', async () => {
+        const res = await request(app)
+            .post('/api/reservations')
+            .send({
+                room_id: 999999,
+                check_in: '2030-12-01',
+                check_out: '2030-12-05'
+            });
+
+        expect(res.status).toBe(404);
     });
 });

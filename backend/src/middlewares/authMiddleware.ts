@@ -32,18 +32,14 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
 };
 
 export const authorize = (roles: string[]) => {
-    return async (req: AuthRequest, res: Response, next: NextFunction) => {
+    return (req: AuthRequest, res: Response, next: NextFunction) => {
         if (!req.user) {
             return res.status(401).json({ error: 'Authentication required' });
         }
 
-        const { data: profile, error } = await supabase
-            .from('profiles') // We might need a profiles table to store roles
-            .select('role')
-            .eq('id', req.user.id)
-            .single();
+        const role = req.user.user_metadata?.role as string | undefined;
 
-        if (error || !profile || !roles.includes(profile.role)) {
+        if (!role || !roles.includes(role)) {
             return res.status(403).json({ error: 'Forbidden: Access denied' });
         }
 
