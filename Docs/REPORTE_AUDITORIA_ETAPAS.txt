@@ -1,0 +1,90 @@
+================================================================================
+AUDITORÍA TÉCNICA Y REPORTE DE ESTADO - PROYECTO HOTEL VÉRTICE (2026-1S)
+================================================================================
+Fecha: 12 de abril de 2026
+Autor: Antigravity AI (Coding Assistant)
+Estado General: Fase 4 - Pruebas y Optimizaciones (QA)
+Progreso Estimado: 85%
+
+--------------------------------------------------------------------------------
+1. RESUMEN DE TRABAJO REALIZADO
+--------------------------------------------------------------------------------
+
+Sprints Completados:
+- [Sprint 1] Análisis y Planificación: Documentación UML, Diseño de historias de usuario y Base de Datos (Relacional).
+- [Sprint 2] Backend (Core): Implementación de API REST con Node.js/Express y Supabase. Gestión de autenticación y lógica base de reservas.
+- [Sprint 3] Frontend (Core): Desarrollo de la UI en React. Integración de flujos de reserva, landing interactiva y perfil de usuario.
+
+Hitos Clave:
+- Sistema de reservas con prevención de traslapes (lógica de negocio robusta).
+- Autenticación segura mediante JWT y Roles (Guest, Admin).
+- Motor de reserva dinámico con cálculo de precios por noches y tipo de habitación.
+- Generación de comprobantes de reserva en formato PDF (jsPDF).
+- Diseño UI Premium bajo el concepto "Boutique Hotel" (Tailwind + Framer Motion).
+
+--------------------------------------------------------------------------------
+2. AUDITORÍA DE ERRORES (BUGS)
+--------------------------------------------------------------------------------
+
+Errores Encontrados y Corregidos:
+- [Backend/API] Error 500 en creación de reservas por mapeo incorrecto de DB joins. (FIXED)
+- [Backend/API] Fuga de lógica: Reservas permitidas en fechas ya ocupadas. (FIXED)
+- [Frontend/Auth] Mismatch en mapeo de datos de Supabase (user_metadata). El perfil no se mostraba tras login. (FIXED)
+- [Frontend/UI] Redireccionamiento forzado a /profile tras login, rompiendo el flujo de reserva. (FIXED: Ahora redirige al origen).
+- [Frontend/Logic] Error en el cálculo de precios: se usaba el campo incorrecto para el precio base. (FIXED)
+
+Errores Pendientes / Por Arreglar:
+- [UI/Consola] Error leve en <Navbar> durante la transición post-registro (Race condition al actualizar estado de Auth).
+- [Performance] Los skeletons de carga en la vista de habitaciones parpadean en conexiones rápidas (Necesita debouncing).
+
+--------------------------------------------------------------------------------
+3. ANÁLISIS DE REQUISITOS FALTANTES (BACKLOG)
+--------------------------------------------------------------------------------
+
+Lo que falta por hacer (Requisitos del Sprint 3 y 4):
+- [Administración] Implementación de "FullCalendar" interactivo para ver disponibilidad mensual.
+- [Administración] Reportes detallados de ingresos por período y lista de huéspedes descargable.
+- [Funcionalidad] Modificación de reservas existentes (backend ya permite cancelar, pero no editar).
+- [Notificaciones] Sistema de envío automático de Email o SMS tras confirmación (Backend necesita integración con API externa).
+- [WCAG] Auditoría de accesibilidad completa (Alt text, navegación por teclado, contrastes).
+
+Lo que falta por probar:
+- Pruebas de carga (Simulación de 100 usuarios concurrentes según requerimiento).
+- Pruebas E2E en flujos administrativos (CRUD de habitaciones desde el dashboard).
+
+--------------------------------------------------------------------------------
+4. ESTRUCTURA DE ETAPAS DEL PROYECTO (ROADMAP)
+--------------------------------------------------------------------------------
+
+Fase 1: Análisis y Planificación (Semanas 1-3) [STATUS: 100%]
+  - 1.1 Levantamiento de requerimientos.
+  - 1.2 Diagramas UML (Casos de uso, Clases, Secuencia).
+  - 1.3 Backlog de Historias de Usuario.
+
+Fase 2: Backend y Base de Datos (Semanas 4-6) [STATUS: 90%]
+  - 2.1 Diseño de base de datos en Supabase.
+  - 2.2 Endpoints de Autenticación y RBAC.
+  - 2.3 Lógica de Reservas y Disponibilidad.
+  - 2.4 *Pendiente: Reportes Administrativos Complejos.*
+
+Fase 3: Frontend e Integración (Semanas 7-9) [STATUS: 85%]
+  - 3.1 Construcción de UI Kit (Componentes atómicos).
+  - 3.2 Integración con API (Servicios frontend).
+  - 3.3 Gestión de Estados globales (Auth & Booking).
+  - 3.4 *Pendiente: Calendario Interactivo.*
+
+Fase 4: Pruebas y Optimizaciones (Semanas 10-12) [STATUS: ONSCHEDULE]
+  - 4.1 Pruebas unitarias de componentes UI.
+  - 4.2 Pruebas de integración de la lógica de negocio (Reservas).
+  - 4.3 Optimización de rendimiento y SEO.
+  - 4.4 *Pendiente: Simulación de carga.*
+
+Fase 5: Despliegue y Cierre (Semanas 13-16) [STATUS: PENDING]
+  - 5.1 Despliegue en Railway/Vercel.
+  - 5.2 Manual de Usuario y Documentación Técnica Final.
+  - 5.3 Presentación y Demo.
+
+--------------------------------------------------------------------------------
+CONCLUSIÓN DEL AUDITOR:
+El proyecto se encuentra en una fase muy sólida. La arquitectura es limpia y escalable. Para cumplir con el 100% de la nota semestral, el equipo debe priorizar la integración del Calendario (Fase 3 extra) y el sistema de Notificaciones (Fase 4 extra).
+--------------------------------------------------------------------------------

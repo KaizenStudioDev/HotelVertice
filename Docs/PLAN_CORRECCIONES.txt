@@ -1,0 +1,149 @@
+================================================================================
+  PLAN DE CORRECCIONES POR ETAPAS - PROYECTO HOTEL VERTICE (2026-1S)
+================================================================================
+Fecha: 12 de abril de 2026
+Basado en: EVALUACION_CONSOLIDADA.txt
+Criterio de orden: impacto en nota + visibilidad en demo del profesor
+
+================================================================================
+ETAPA 1 — BUGS CRITICOS DE PRECIO Y CALCULO  [FRONTEND]
+================================================================================
+Estos bugs hacen que el precio mostrado al usuario sea SIEMPRE incorrecto.
+El profesor lo vera en la demo. Son los mas urgentes de corregir.
+
+  [x] BUG-F01  Payment.tsx — noches hardcodeadas en 5
+               Calcular dynamicamente: checkOut - checkIn en dias reales.
+
+  [x] BUG-F02  PaymentConfirmation.tsx — precio multiplicado por 2 fijo
+               Usar el total real calculado desde el BookingContext.
+
+  [x] BUG-F03  BookingDetails.tsx — noches hardcodeadas en resumen de precio
+               Calcular y mostrar noches reales segun fechas del contexto.
+
+  Archivos:  frontend/src/pages/Payment.tsx
+             frontend/src/pages/PaymentConfirmation.tsx
+             frontend/src/pages/BookingDetails.tsx
+             frontend/src/context/BookingContext.tsx (calcNights() exportada)
+
+--------------------------------------------------------------------------------
+ETAPA 2 — BUSCADOR DE LANDING CONECTADO AL FLUJO DE RESERVA  [FRONTEND]
+--------------------------------------------------------------------------------
+El buscador de la landing es la primera cosa que el profesor usara en la demo.
+Actualmente no hace nada: las fechas y huespedes no fluyen al flujo de reserva.
+
+  [x] BUG-F04  Landing.tsx — inputs de fecha y huespedes no actualizan contexto
+               Al hacer clic en "Buscar" debe:
+               1. Guardar checkIn, checkOut y guests en BookingContext.
+               2. Navegar a /rooms.
+               Rooms.tsx debe mostrar las fechas seleccionadas en el header.
+
+  Archivos:  frontend/src/pages/Landing.tsx
+             frontend/src/context/BookingContext.tsx
+
+--------------------------------------------------------------------------------
+ETAPA 3 — RBAC: ACTIVAR EL MIDDLEWARE DE ROLES  [BACKEND]
+--------------------------------------------------------------------------------
+La funcion authorize() ya existe y funciona, pero nunca se aplica en las rutas.
+Cualquier usuario puede hacer llamadas de admin. Facil de corregir.
+
+  [x] BUG-B01  authMiddleware.ts — authorize() sin usar en ninguna ruta
+               Proteger las rutas que requieren rol admin:
+               - POST /api/rooms (crear habitacion) → solo admin
+               - PUT/PATCH /api/rooms/:id → solo admin
+               - DELETE /api/rooms/:id → solo admin
+               - GET /api/reservations/admin/all → solo admin
+
+  Archivos:  backend/src/routes/roomRoutes.ts
+             backend/src/routes/reservationRoutes.ts
+             backend/src/middlewares/authMiddleware.ts
+
+--------------------------------------------------------------------------------
+ETAPA 4 — QUERY JOIN INCORRECTO EN RESERVAS  [BACKEND]
+--------------------------------------------------------------------------------
+El join de la query de reservaciones tiene un alias incorrecto que puede
+causar que los datos de tipo de habitacion no lleguen bien al frontend.
+
+  [ ] BUG-B02  reservationController.ts linea 8 — join mal formado
+               Cambiar:
+                 .select('*, rooms(*), room_types:rooms(room_types(*))')
+               Por:
+                 .select('*, rooms(*, room_types(*))')
+
+  Archivos:  backend/src/controllers/reservationController.ts
+
+--------------------------------------------------------------------------------
+ETAPA 5 — MENU MOBILE Y FORMULARIOS DE PERFIL  [FRONTEND]
+--------------------------------------------------------------------------------
+Detalles de UX que el profesor notara al navegar desde el celular o al
+intentar editar su perfil.
+
+  [x] BUG-F06  Navbar.tsx — menu hamburguesa sin implementar
+               Agregar estado isOpen y renderizar el menu mobile al hacer clic.
+
+  [x] BUG-F07  UserProfile.tsx — formularios de datos y seguridad sin guardar
+               Conectar "Datos Personales" y "Cambiar Contrasena" a la API.
+               Datos personales: PATCH /api/auth/profile
+               Contrasena: PATCH /api/auth/password
+
+  Archivos:  frontend/src/components/layout/Navbar.tsx
+             frontend/src/pages/UserProfile.tsx
+
+--------------------------------------------------------------------------------
+ETAPA 6 — ADMIN DASHBOARD: DATOS REALES Y GESTION  [FRONTEND + BACKEND]
+--------------------------------------------------------------------------------
+El panel admin muestra datos hardcodeados y el tab de reservas es un
+placeholder. Es el modulo mas incompleto visible para el profesor.
+
+  [x] BUG-F08  AdminDashboard.tsx — tab "Reservas" es texto placeholder
+               Implementar lista real de todas las reservas con opcion de
+               cancelar (llamar a PATCH /api/reservations/:id/cancel).
+
+  [x] NUEVO    AdminDashboard.tsx — estadisticas hardcodeadas
+               Calcular desde la API: total reservas, habitaciones disponibles,
+               ingresos estimados.
+
+  [x] NUEVO    Backend — endpoint GET /api/reservations/admin/all
+               Creado en Etapa 3. Devuelve todas las reservas solo para admin.
+
+  Archivos:  frontend/src/pages/AdminDashboard.tsx
+             backend/src/controllers/reservationController.ts
+             backend/src/routes/reservationRoutes.ts
+
+--------------------------------------------------------------------------------
+ETAPA 7 — FECHAS INICIALES Y CODIGO MUERTO  [FRONTEND]
+--------------------------------------------------------------------------------
+Limpieza de detalles menores que quedan despues de las etapas anteriores.
+
+  [x] BUG-F09  frontend/src/lib/supabaseClient.ts — eliminado (codigo muerto).
+               La carpeta lib/ tambien fue eliminada al quedar vacia.
+
+  [x] BUG-F10  BookingContext.tsx — fechas iniciales dinamicas.
+               Resuelto en Etapa 1: fechas iniciales calculadas con new Date().
+
+  Archivos:  frontend/src/lib/supabaseClient.ts (eliminar)
+             frontend/src/context/BookingContext.tsx
+
+================================================================================
+ORDEN DE EJECUCION RECOMENDADO
+================================================================================
+
+  ETAPA 1  →  ETAPA 2  →  ETAPA 3  →  ETAPA 4  →  ETAPA 5  →  ETAPA 6  →  ETAPA 7
+
+  Etapas 1-2: Impacto directo en la demo (el profesor hace una reserva)
+  Etapas 3-4: Correccion de backend silenciosa pero importante para la nota
+  Etapas 5-6: Mejoras de UX y completitud del panel admin
+  Etapa  7:   Limpieza final antes de la presentacion
+
+================================================================================
+ESTADO DE AVANCE
+================================================================================
+
+  Etapa 1 — Bugs criticos de precio:           [x] COMPLETADA
+  Etapa 2 — Buscador landing conectado:         [x] COMPLETADA
+  Etapa 3 — RBAC activado en rutas:             [x] COMPLETADA
+  Etapa 4 — Query join corregido:               [ ] PENDIENTE
+  Etapa 5 — Menu mobile y perfil:               [x] COMPLETADA
+  Etapa 6 — Admin dashboard completo:           [x] COMPLETADA
+  Etapa 7 — Limpieza final:                     [x] COMPLETADA
+
+================================================================================

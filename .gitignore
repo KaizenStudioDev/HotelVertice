@@ -36,3 +36,7 @@ Thumbs.db
 /tmp
 *.zip
 *.tar.gz
+
+# Test coverage reports (auto-generated)
+coverage/
+*.lcov

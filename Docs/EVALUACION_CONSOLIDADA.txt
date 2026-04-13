@@ -1,0 +1,466 @@
+================================================================================
+  EVALUACION TECNICA CONSOLIDADA - PROYECTO HOTEL VERTICE (2026-1S)
+================================================================================
+Fecha de evaluacion: 12 de abril de 2026
+Evaluador: Claude Code (Anthropic) — Revision de codigo y documentacion
+Fuentes: sprint y requisitos.doc.txt, PLAN_ARQUITECTURA_FRONTEND.md,
+         REPORTE_AUDITORIA_ETAPAS.txt, codigo fuente backend/ y frontend/
+Progreso global estimado: 82%
+
+================================================================================
+1. RESUMEN EJECUTIVO
+================================================================================
+
+El proyecto Hotel Vertice es un sistema web full-stack de gestion de reservas
+hoteleras desarrollado con Node.js/Express + Supabase (backend) y React/Vite/
+TypeScript + Tailwind CSS (frontend). El equipo ha completado los Sprints 1, 2
+y 3, y se encuentra ejecutando el Sprint 4 (pruebas y optimizaciones).
+
+La arquitectura general es limpia, profesional y escalable. El flujo core de
+reservas (registro, login, ver habitaciones, reservar, confirmar, ver perfil)
+esta operativo de extremo a extremo. Sin embargo, existen bugs criticos de
+logica, caracteristicas faltantes del enunciado del profesor, y areas de calidad
+de codigo que deben atenderse para alcanzar la maxima calificacion.
+
+ESTADO POR SPRINT:
+  Sprint 1 (Analisis y Planificacion):     COMPLETO    [100%]
+  Sprint 2 (Backend y Base de Datos):      CASI COMPLETO [88%]
+  Sprint 3 (Frontend e Integracion):       EN PROGRESO  [78%]
+  Sprint 4 (Pruebas y Optimizaciones):     EN PROGRESO  [60%]
+  Sprint 5 (Despliegue y Presentacion):    PENDIENTE    [0%]
+
+================================================================================
+2. EVALUACION DE REQUISITOS FUNCIONALES (segun enunciado del profesor)
+================================================================================
+
+RF-01  Registro y login de usuarios (huespedes, recepcionistas, admins)
+       Estado:   PARCIALMENTE CUMPLIDO
+       Lo hecho: Login y registro de usuarios funcional con JWT y Supabase Auth.
+                 Roles definidos en el sistema (guest, admin).
+       Faltante: Rol "recepcionista" no esta implementado ni diferenciado del
+                 rol "guest". No hay flujo de login separado para admin/recep.
+       Evidencia: backend/src/controllers/authController.ts,
+                  frontend/src/pages/Login.tsx
+
+RF-02  Busqueda y reserva de habitaciones con disponibilidad en tiempo real
+       Estado:   PARCIALMENTE CUMPLIDO
+       Lo hecho: Lista de habitaciones con filtros de piso y vista. Reserva con
+                 validacion de traslapes en el backend.
+       Faltante: El buscador de la landing page (fechas, num. huespedes) NO
+                 pasa los datos al contexto de reserva. La disponibilidad
+                 por fechas no se filtra en la vista de habitaciones.
+       Evidencia: frontend/src/pages/Landing.tsx, frontend/src/pages/Rooms.tsx,
+                  frontend/src/context/BookingContext.tsx
+
+RF-03  Gestion de reservas: confirmacion, modificacion, cancelacion
+       Estado:   PARCIALMENTE CUMPLIDO
+       Lo hecho: Confirmacion al crear reserva (status='confirmed').
+                 Cancelacion funcional desde el backend.
+       Faltante: Modificacion de reservas NO implementada (ni frontend ni
+                 backend). La cancelacion desde el perfil de usuario no es
+                 visible en el frontend (solo el admin puede ver reservas
+                 en el dashboard, pero no cancelarlas desde la UI del usuario).
+       Evidencia: backend/src/controllers/reservationController.ts (linea 82),
+                  frontend/src/pages/UserProfile.tsx
+
+RF-04  Check-in / Check-out y facturacion
+       Estado:   NO CUMPLIDO
+       Lo hecho: Generacion de PDF como comprobante de reserva (jsPDF).
+       Faltante: No existen endpoints ni UI para registrar check-in o check-out.
+                 No hay facturacion formal. El PDF generado es un "comprobante",
+                 no una factura con impuestos, numero de factura, etc.
+       Evidencia: frontend/src/services/pdfService.ts
+
+RF-05  Panel administrativo: reportes de ocupacion, ingresos, lista de huespedes
+       Estado:   MINIMO CUMPLIDO
+       Lo hecho: AdminDashboard con tres tabs: estadisticas generales (numeros
+                 hardcodeados), lista de reservas (datos reales desde API),
+                 y estado de habitaciones.
+       Faltante: - Reportes de ocupacion diaria/semanal: NO IMPLEMENTADOS.
+                 - Reportes de ingresos por periodo: NO IMPLEMENTADOS.
+                 - Lista de huespedes descargable: NO IMPLEMENTADA.
+                 - El tab "Reservas" del admin muestra texto de placeholder:
+                   "Interfaz de busqueda avanzada... (Proxima actualizacion)".
+                 - No hay CRUD de habitaciones desde el dashboard.
+       Evidencia: frontend/src/pages/AdminDashboard.tsx (lineas con placeholder)
+
+RF-06  Notificaciones automaticas (email/SMS)
+       Estado:   NO CUMPLIDO
+       Lo hecho: Nada implementado.
+       Faltante: Integracion con API externa de email (SendGrid, Resend, etc.)
+                 o SMS. No hay ninguna referencia en el backend.
+
+RF-07  Integracion con calendario (FullCalendar, estados de habitaciones)
+       Estado:   NO CUMPLIDO
+       Lo hecho: Nada implementado.
+       Faltante: El Sprint 3 exige un calendario interactivo con FullCalendar
+                 que muestre estados (libre, reservada, ocupada, mantenimiento).
+                 No existe ni la dependencia instalada.
+       Evidencia: frontend/package.json (FullCalendar ausente)
+
+================================================================================
+3. EVALUACION DE REQUISITOS NO FUNCIONALES
+================================================================================
+
+RNF-01 Interfaz responsive y accesible (WCAG 2.1)
+       Estado:   PARCIALMENTE CUMPLIDO
+       Lo hecho: Diseno responsive con Tailwind CSS (breakpoints md/lg).
+                 Animaciones suaves con Framer Motion.
+       Faltante: Sin auditoria WCAG formal. Falta alt text sistematico en
+                 imagenes, navegacion por teclado en menus mobile, skip-to-
+                 content, y revision de contrastes de color.
+                 Menu mobile del Navbar es un STUB (boton sin funcion).
+
+RNF-02 Seguridad: JWT, prevencion SQLi/XSS, encriptacion PII
+       Estado:   PARCIALMENTE CUMPLIDO
+       Lo hecho: JWT implementado correctamente con Supabase Auth.
+                 Supabase maneja parametrizacion de queries (previene SQLi).
+       Faltante: - El archivo .env con credenciales esta siendo trackeado por
+                 Git. NOTA: El repositorio es privado y de acceso restringido
+                 al equipo de trabajo autorizado, por lo que el impacto real
+                 es bajo en el contexto actual del proyecto. Se mantiene como
+                 recomendacion de buenas practicas para cuando el proyecto
+                 se despliegue o el repo cambie de visibilidad.
+                 - No hay rate limiting en endpoints de autenticacion
+                   (vulnerable a fuerza bruta).
+                 - No hay sanitizacion de inputs en el frontend antes de
+                   enviar a la API.
+                 - Los mensajes de error del backend exponen detalles internos
+                   directamente (error.message sin sanitizar).
+
+RNF-03 Despliegue en plataforma gratuita con BD PostgreSQL
+       Estado:   PENDIENTE
+       Lo hecho: Configuracion de Supabase (PostgreSQL) operativa.
+                 El proyecto esta preparado para Railway/Vercel (estructura ok).
+       Faltante: No se ha realizado ninguna configuracion de despliegue.
+                 No existe railway.json, vercel.json, ni Dockerfile.
+
+RNF-04 Control de versiones Git, codigo modular, pruebas >70% cobertura, UML
+       Estado:   MAYORMENTE CUMPLIDO
+       Lo hecho: Repositorio Git activo. Cobertura de pruebas del backend
+                 en ~76% (supera el 70%). Estructura de carpetas modular.
+                 Documentacion UML fue generada en Sprint 1.
+       Faltante: Solo hay 1 commit en el historial ("Initial commit"), lo que
+                 significa que no hay commits distribuidos ni historia de trabajo
+                 incremental visible — esto afecta el criterio "Colaboracion"
+                 del 15% de la nota.
+                 Pruebas del frontend solo cubren Button y Badge (2 componentes),
+                 practicamente 0% de cobertura de paginas y servicios.
+
+RNF-05 Rendimiento: soporte 100 reservas concurrentes simuladas
+       Estado:   NO EVALUADO
+       Lo hecho: Nada.
+       Faltante: Pruebas de carga no implementadas. Herramientas como k6 o
+                 Artillery no estan instaladas ni configuradas.
+
+================================================================================
+4. EVALUACION DEL BACKEND
+================================================================================
+
+4.1 ESTRUCTURA Y ARQUITECTURA
+  + Express server correctamente configurado con rutas modularizadas.
+  + Separacion clara: controllers/, routes/, middlewares/, utils/.
+  - Directorios models/ y services/ estan VACIOS. Se planearon pero nunca
+    se usaron — la logica de negocio esta mezclada en los controllers.
+
+4.2 CONTROLLERS
+
+  authController.ts (56 lineas)
+  + Registro, login y getProfile implementados correctamente.
+  + Manejo de errores con status HTTP apropiados.
+  - Uso de "error: any" en catch blocks (mala practica en TypeScript).
+  - getProfile() asume que existe una tabla "profiles" pero no esta
+    documentado que esta tabla exista o tenga la estructura correcta.
+
+  reservationController.ts (116 lineas)
+  + Validacion de fechas (check-in < check-out). CORRECTO.
+  + Deteccion de traslapes con query de overlapping. CORRECTO.
+  + Calculo de precio (noches * base_price). CORRECTO.
+  - LINEA 8: Query join incorrecto:
+      .select('*, rooms(*), room_types:rooms(room_types(*))')
+    El alias "room_types:rooms(...)" es confuso y probablemente incorrecto.
+    Deberia ser: .select('*, rooms(*, room_types(*))')
+  - No hay validacion del tipo de room_id (podria enviarse un string).
+  - No hay endpoint para MODIFICAR una reserva existente.
+
+  roomController.ts (40 lineas)
+  + GET all rooms y GET by ID funcionan correctamente.
+  - Faltan endpoints de administracion: POST (crear), PUT/PATCH (editar),
+    DELETE (eliminar) habitacion — necesarios para el panel admin.
+
+4.3 MIDDLEWARES
+
+  authMiddleware.ts (53 lineas)
+  + authenticate(): Validacion de JWT via Supabase. CORRECTO.
+  + authorize(): RBAC implementado correctamente.
+  - CRITICO: La funcion authorize() NUNCA se usa en ningun route.
+    Las rutas de admin no estan protegidas por rol.
+    Cualquier usuario autenticado puede acceder a endpoints de admin.
+
+4.4 RUTAS
+  + authRoutes.ts, roomRoutes.ts, reservationRoutes.ts bien estructuradas.
+  - Todos los GET de habitaciones son publicos — correcto.
+  - Las rutas de reservas estan autenticadas — correcto.
+  - No existen rutas de administracion (/api/admin/*).
+
+4.5 PRUEBAS DEL BACKEND
+  + 5 archivos de prueba: auth, rooms, reservations, middleware, full_qa.
+  + Cobertura ~76% (cumple requisito >70%).
+  + Uso de Vitest + Supertest (eleccion correcta).
+  - auth.test.ts linea 26: Acepta tanto 201 como 400 — demasiado permisivo.
+  - full_qa.test.ts linea 30: Usa UUID ficticio que probablemente no existe
+    en la DB de pruebas — el test puede pasar por razones incorrectas.
+  - reservations.test.ts: vi.mock() despues de beforeAll puede causar
+    comportamiento no determinista.
+
+4.6 SEGURIDAD
+  CRITICO: El archivo .env esta commiteado en el repositorio (visible en
+           git history). Contiene SUPABASE_SERVICE_ROLE_KEY que da acceso
+           total a la base de datos.
+  - No existe .env.example para documentar variables requeridas.
+  - No hay rate limiting en /api/auth/login (riesgo de fuerza bruta).
+  - Los mensajes de error devuelven error.message del sistema directamente.
+
+================================================================================
+5. EVALUACION DEL FRONTEND
+================================================================================
+
+5.1 ARQUITECTURA Y DISENO
+  + Estructura clara: pages/, components/, context/, services/.
+  + Design system implementado correctamente (colores, tipografia, UI Kit).
+  + Tailwind configurado con paleta personalizada (dorado, navy, etc.).
+  + Framer Motion para transiciones de pagina.
+  + Context API para estado global (AuthContext, BookingContext, ToastContext).
+
+5.2 PAGINAS IMPLEMENTADAS (11/10 planeadas + 1 extra)
+  + Landing.tsx      — Hero, habitaciones destacadas, buscador (UI completa).
+  + Features.tsx     — Servicios del hotel, spa, gimnasio.
+  + Rooms.tsx        — Lista de habitaciones con filtros, integrada a la API.
+  + BookingDetails.tsx — Formulario de datos del huesped.
+  + Payment.tsx      — Formulario de pago (mock).
+  + PaymentConfirmation.tsx — Confirmacion con descarga de PDF.
+  + Login.tsx / Register.tsx — Autenticacion funcional.
+  + UserProfile.tsx  — 3 tabs: mis reservas, datos personales, seguridad.
+  + AdminDashboard.tsx — Panel administrativo basico.
+  + UIKitTest.tsx    — Pagina de prueba del design system (util para dev).
+
+5.3 BUGS CRITICOS EN EL FRONTEND
+
+  BUG-F01 [CRITICO] Payment.tsx linea 16:
+    const totalDays = 5; // HARDCODEADO
+    El numero de noches no se calcula a partir de las fechas reales del
+    BookingContext. El precio total siempre sera incorrecto.
+
+  BUG-F02 [CRITICO] PaymentConfirmation.tsx linea ~27:
+    (booking.pricePerNight || 0) * 2
+    Multiplica por 2 en lugar del numero real de noches. El comprobante
+    PDF mostrara siempre el precio equivocado.
+
+  BUG-F03 [CRITICO] BookingDetails.tsx linea ~97-98:
+    Igual que BUG-F01, calcula precio con noches fijas en lugar de las
+    fechas del contexto.
+
+  BUG-F04 [ALTO] Landing.tsx — Buscador no funcional:
+    El formulario de busqueda (fechas, huespedes, tipo) NO actualiza el
+    BookingContext. Al navegar a /rooms, no se aplican los criterios
+    de busqueda ingresados.
+
+  BUG-F05 [ALTO] Rooms.tsx — Disponibilidad no verificada por fechas:
+    La pagina filtra habitaciones por status === 'available' pero no
+    verifica contra las fechas seleccionadas por el usuario. Una habitacion
+    puede mostrarse como disponible aunque tenga una reserva en esas fechas.
+
+  BUG-F06 [MEDIO] Navbar.tsx — Menu mobile no implementado:
+    El boton hamburguesa esta en el HTML pero no tiene handler. En mobile,
+    el menu de navegacion es completamente inaccesible.
+
+  BUG-F07 [MEDIO] UserProfile.tsx — Tabs de edicion sin funcionalidad:
+    Los formularios de "Datos Personales" y "Seguridad" hacen preventDefault()
+    pero no llaman a ningun servicio de la API. Los cambios no se guardan.
+
+  BUG-F08 [MEDIO] AdminDashboard.tsx — Tab "Reservas" es placeholder:
+    El segundo tab del dashboard admin muestra el texto:
+    "Interfaz de busqueda avanzada... (Proxima actualizacion)"
+    No tiene ninguna funcionalidad real.
+
+  BUG-F09 [BAJO] frontend/src/lib/supabaseClient.ts — Importado pero inutil:
+    Este archivo crea un cliente de Supabase directamente en el frontend,
+    pero nunca se usa (toda la comunicacion va por la API del backend).
+    Codigo muerto que genera confusion.
+
+  BUG-F10 [BAJO] BookingContext.tsx — Fechas hardcodeadas como estado inicial:
+    checkIn: '2026-04-15', checkOut: '2026-04-20'
+    Las fechas iniciales son fechas fijas pasadas, no fechas dinamicas.
+
+5.4 CARACTERISTICAS FALTANTES (frontend)
+  - No hay pagina 404 (not found).
+  - No hay pagina de restablecimiento de contrasena.
+  - No hay confirmacion de cancelacion de reserva desde el perfil del usuario.
+  - No hay calendario interactivo (FullCalendar) — requerido por Sprint 3.
+  - No hay gestion de habitaciones en el admin (crear, editar, eliminar rooms).
+  - No hay reportes descargables desde el panel admin.
+  - Estadisticas del AdminDashboard son datos hardcodeados, no desde la API.
+
+5.5 PRUEBAS DEL FRONTEND
+  - Solo existen pruebas para Button.tsx y Badge.tsx (componentes atomicos).
+  - 0% de cobertura en paginas, contextos y servicios.
+  - No hay pruebas E2E (Cypress o Playwright) — requeridas en Sprint 4.
+
+================================================================================
+6. TABLA CONSOLIDADA DE BUGS
+================================================================================
+
+Severidad | ID      | Descripcion                              | Archivo
+----------|---------|------------------------------------------|------------------------
+BAJO      | SEC-01  | .env commiteado en Git (repo privado,    | backend/.env
+          |         | impacto bajo en contexto actual)         |
+CRITICO   | BUG-F01 | Noches hardcodeadas (5) en Payment       | frontend/.../Payment.tsx
+CRITICO   | BUG-F02 | Precio * 2 incorrecto en Confirmacion    | frontend/.../PaymentConfirmation.tsx
+CRITICO   | BUG-F03 | Noches hardcodeadas en BookingDetails    | frontend/.../BookingDetails.tsx
+ALTO      | BUG-B01 | authorize() middleware nunca se aplica   | backend/src/middlewares/authMiddleware.ts
+ALTO      | BUG-B02 | Join incorrecto en query de reservas     | backend/src/controllers/reservationController.ts:8
+ALTO      | BUG-F04 | Buscador de landing no actualiza contexto| frontend/.../Landing.tsx
+ALTO      | BUG-F05 | Disponibilidad no validada por fechas    | frontend/.../Rooms.tsx
+MEDIO     | BUG-B03 | error.message expuesto directamente      | backend/src/controllers/*.ts
+MEDIO     | BUG-B04 | Uso excesivo de "any" en TypeScript      | backend/src/controllers/*.ts
+MEDIO     | BUG-F06 | Menu mobile sin implementar              | frontend/.../Navbar.tsx
+MEDIO     | BUG-F07 | Formularios de perfil no guardan datos   | frontend/.../UserProfile.tsx
+MEDIO     | BUG-F08 | Tab Reservas del admin es placeholder    | frontend/.../AdminDashboard.tsx
+BAJO      | BUG-B05 | models/ y services/ vacios               | backend/src/models/, services/
+BAJO      | BUG-B06 | Sin .env.example documentando variables  | backend/
+BAJO      | BUG-B07 | Sin rate limiting en /api/auth/login     | backend/src/routes/authRoutes.ts
+BAJO      | BUG-F09 | supabaseClient.ts en frontend sin uso    | frontend/src/lib/supabaseClient.ts
+BAJO      | BUG-F10 | Fechas iniciales hardcodeadas en contexto| frontend/src/context/BookingContext.tsx
+
+================================================================================
+7. LO QUE ESTA BIEN HECHO
+================================================================================
+
+ARQUITECTURA GENERAL:
+  + Separacion clara frontend/backend — arquitectura profesional.
+  + TypeScript en ambos lados — decision correcta para un proyecto academico.
+  + Supabase como BaaS — apropiado para el scope del proyecto.
+  + Uso de JWT para autenticacion — estandar de la industria.
+
+BACKEND:
+  + Logica de prevencion de traslapes de reservas: correcta y robusta.
+  + Middleware de autenticacion bien implementado (aunque sin usarse para RBAC).
+  + Calculo dinamico de precios por tipo de habitacion.
+  + Seeder con 24 habitaciones distribuidas correctamente por pisos y tipos.
+  + Cobertura de pruebas del 76% (supera el minimo requerido del 70%).
+  + Uso de Vitest + Supertest (eleccion moderna y correcta).
+
+FRONTEND:
+  + Design system completo y coherente (paleta dorado/navy, tipografia elegante).
+  + Componentes atomicos reutilizables (Button, Input, Select, Card, Badge).
+  + Generacion de PDF de comprobantes con jsPDF — feature diferenciador.
+  + Sistema de Toast notifications no intrusivo.
+  + Transiciones de pagina fluidas con Framer Motion.
+  + Diseno responsive funcional en la mayoria de vistas.
+  + Flujo de autenticacion completo con persistencia en localStorage.
+  + Context API bien estructurado para estado global (Auth + Booking).
+  + AdminDashboard con vista de estado de habitaciones (grid 24 rooms).
+
+DOCUMENTACION:
+  + PLAN_ARQUITECTURA_FRONTEND.md: Documentacion de diseno detallada.
+  + REPORTE_AUDITORIA_ETAPAS.txt: Seguimiento de estado del proyecto.
+  + Historias de usuario y diagramas UML generados en Sprint 1.
+
+================================================================================
+8. RECOMENDACIONES PRIORITARIAS PARA MAXIMIZAR NOTA
+================================================================================
+
+PRIORIDAD MAXIMA (impactan directamente la calificacion):
+
+  P1. CORREGIR BUGS CRITICOS DE PRECIO (BUG-F01, F02, F03)
+      Calcular noches dinamicamente: Math.ceil((checkOut - checkIn) / 86400000)
+      El profesor verificara que el precio mostrado sea correcto.
+
+  P2. IMPLEMENTAR CALENDARIO INTERACTIVO (RF-07)
+      Instalar FullCalendar + React. Es un requisito explicito del Sprint 3.
+      Sin esto, el Sprint 3 esta incompleto.
+
+  P3. BUENAS PRACTICAS DE SEGURIDAD (SEC-01) [BAJA PRIORIDAD]
+      El repositorio es privado y el equipo es cerrado, por lo que el
+      impacto actual es bajo. Para el despliegue final (Sprint 5) se
+      recomienda mover las claves a variables de entorno de la plataforma
+      (Railway/Vercel) y agregar .env al .gitignore.
+
+  P4. ACTIVAR RBAC EN LAS RUTAS (BUG-B01)
+      Usar el middleware authorize() ya implementado en las rutas de admin.
+      Sin esto, cualquier usuario puede hacer llamadas de administrador.
+
+  P5. CREAR MAS COMMITS CON HISTORIA INCREMENTAL
+      El criterio "Colaboracion" (15%) revisa commits distribuidos.
+      El historial actual tiene 1 solo commit — esto perjudica la nota.
+
+PRIORIDAD ALTA (mejoran calidad y funcionalidad):
+
+  P6. CONECTAR BUSCADOR DE LANDING CON BOOKING CONTEXT (BUG-F04)
+      Las fechas y huespedes ingresados deben fluir al flujo de reserva.
+
+  P7. IMPLEMENTAR MODIFICACION DE RESERVAS (RF-03)
+      Backend: nuevo endpoint PATCH /api/reservations/:id
+      Frontend: boton "Modificar" en perfil del usuario.
+
+  P8. COMPLETAR MENU MOBILE (BUG-F06)
+      Implementar estado de apertura/cierre del menu hamburguesa.
+
+  P9. CONECTAR ESTADISTICAS DEL ADMIN A LA API REAL
+      Las metricas del dashboard deben calcularse desde la base de datos.
+
+PRIORIDAD MEDIA (para Sprint 4 y 5):
+
+  P10. AGREGAR PRUEBAS E2E CON CYPRESS O PLAYWRIGHT
+       El Sprint 4 pide pruebas automatizadas de flujos completos.
+
+  P11. CONFIGURAR DESPLIEGUE EN VERCEL/RAILWAY
+       Necesario para Sprint 5 y para la demo final.
+
+  P12. IMPLEMENTAR NOTIFICACIONES DE EMAIL
+       Usar Resend o SendGrid (plan gratuito) para confirmaciones de reserva.
+
+  P13. COMPLETAR FORMULARIOS DE PERFIL
+       Conectar los formularios de "Datos Personales" y "Seguridad" a la API.
+
+================================================================================
+9. ESTIMACION DE NOTA SEGUN CRITERIOS DEL PROFESOR
+================================================================================
+
+Criterio                   | Peso | Estimacion Actual | Razon
+---------------------------|------|-------------------|----------------------------------
+Avance iterativo           |  40% | 28-32/40          | Sprints 1-2 completos, Sprint 3
+                           |      |                   | incompleto (falta calendario),
+                           |      |                   | 1 solo commit perjudica historial.
+Calidad del software       |  30% | 20-23/30          | Funcionalidad core ok, pero bugs
+                           |      |                   | criticos de precio, sin RBAC
+                           |      |                   | activo, cobertura frontend baja.
+Colaboracion               |  15% | 8-10/15           | Sin historial de commits visible.
+                           |      |                   | No se puede evaluar trabajo en equipo.
+Innovacion y defensa       |  15% | 10-12/15          | PDF de comprobantes es un extra
+                           |      |                   | valioso. Diseno premium diferencia.
+---------------------------|------|-------------------|----------------------------------
+TOTAL ESTIMADO             | 100% | 66-77 / 100       | Nota: entre 3.3 y 3.8 (aprox)
+
+Con las correcciones de P1-P5: 78-88/100 (nota: 3.9 - 4.4 aprox)
+Con las correcciones P1-P10:   88-95/100 (nota: 4.4 - 4.8 aprox)
+
+================================================================================
+CONCLUSION
+================================================================================
+
+El proyecto tiene una base tecnica solida y un diseno visual de calidad
+profesional. El flujo principal de reservas es funcional de extremo a extremo,
+lo cual es el logro mas importante. Sin embargo, para cumplir al 100% con los
+requisitos del enunciado del profesor, se deben atacar urgentemente los bugs
+criticos de calculo de precio (que el profesor verificara en la demo), la
+implementacion del calendario FullCalendar (requisito explicito del Sprint 3),
+y el historial de commits (criterio de colaboracion del 15%).
+
+El calendario interactivo y las notificaciones de email son los dos gaps mas
+grandes frente a los requisitos del enunciado. Las demas correcciones son de
+calidad de codigo y se pueden abordar sistematicamente.
+
+================================================================================
+FIN DEL REPORTE
+================================================================================
