@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Menu, X, User, Settings, LogOut } from 'lucide-react';
+import { Menu, X, User, Settings, LogOut, Calendar } from 'lucide-react';
 
 const Navbar: React.FC = () => {
     const { user, logout } = useAuth();
@@ -34,6 +34,9 @@ const Navbar: React.FC = () => {
                     <Link to="/" className="text-white hover:text-gold text-sm font-medium transition-colors uppercase tracking-[0.2em]">Inicio</Link>
                     <Link to="/features" className="text-white hover:text-gold text-sm font-medium transition-colors uppercase tracking-[0.2em]">Características</Link>
                     <Link to="/rooms" className="text-white hover:text-gold text-sm font-medium transition-colors uppercase tracking-[0.2em]">Habitaciones</Link>
+                    {user && (
+                        <Link to="/calendar" className="text-white hover:text-gold text-sm font-medium transition-colors uppercase tracking-[0.2em]">Calendario</Link>
+                    )}
 
                     {user ? (
                         <div className="flex items-center gap-6 ml-4 pl-6 border-l border-white/10">
@@ -77,6 +80,11 @@ const Navbar: React.FC = () => {
                     <Link to="/" onClick={close} className="py-3 text-white hover:text-gold text-sm font-medium uppercase tracking-[0.2em] border-b border-white/10">Inicio</Link>
                     <Link to="/features" onClick={close} className="py-3 text-white hover:text-gold text-sm font-medium uppercase tracking-[0.2em] border-b border-white/10">Características</Link>
                     <Link to="/rooms" onClick={close} className="py-3 text-white hover:text-gold text-sm font-medium uppercase tracking-[0.2em] border-b border-white/10">Habitaciones</Link>
+                    {user && (
+                        <Link to="/calendar" onClick={close} className="py-3 flex items-center gap-3 text-white hover:text-gold text-sm font-medium uppercase tracking-[0.2em] border-b border-white/10">
+                            <Calendar size={16} className="text-gold" />Calendario
+                        </Link>
+                    )}
 
                     {user ? (
                         <>

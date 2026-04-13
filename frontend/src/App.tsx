@@ -12,6 +12,7 @@ import Payment from './pages/Payment';
 import PaymentConfirmation from './pages/PaymentConfirmation';
 import UserProfile from './pages/UserProfile';
 import AdminDashboard from './pages/AdminDashboard';
+import CalendarPage from './pages/CalendarPage';
 import { BookingProvider } from './context/BookingContext';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
@@ -37,6 +38,7 @@ function App() {
                 <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
                 <Route path="/profile" element={<UserProfile />} />
                 <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/calendar" element={<CalendarPage />} />
                 {/* Add more routes here in future phases */}
               </Route>
             </Routes>

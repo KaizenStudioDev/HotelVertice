@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { roomService, reservationService } from '../services/api';
 import { useToast } from '../context/ToastContext';
+import { Calendar } from 'lucide-react';
 
 const STATUS_LABEL: Record<string, string> = {
     confirmed: 'Confirmada',
@@ -92,12 +94,21 @@ const AdminDashboard: React.FC = () => {
                         <h1 className="text-3xl font-playfair font-bold text-dark">Panel de Administrador</h1>
                         <p className="text-gray italic text-sm">Gestionando Hotel Vértice</p>
                     </div>
-                    <div className="flex bg-white rounded-xl p-1 shadow-sm border border-gray-medium">
-                        {(['overview', 'bookings', 'rooms'] as const).map((v) => (
-                            <Button key={v} variant={view === v ? 'secondary' : 'ghost'} size="sm" onClick={() => setView(v)}>
-                                {{ overview: 'General', bookings: 'Reservas', rooms: 'Habitaciones' }[v]}
-                            </Button>
-                        ))}
+                    <div className="flex items-center gap-3">
+                        <Link
+                            to="/calendar"
+                            className="flex items-center gap-2 px-4 py-2 bg-gold/10 text-gold border border-gold/30 rounded-xl text-sm font-semibold hover:bg-gold/20 transition-colors"
+                        >
+                            <Calendar size={16} />
+                            Ver Calendario
+                        </Link>
+                        <div className="flex bg-white rounded-xl p-1 shadow-sm border border-gray-medium">
+                            {(['overview', 'bookings', 'rooms'] as const).map((v) => (
+                                <Button key={v} variant={view === v ? 'secondary' : 'ghost'} size="sm" onClick={() => setView(v)}>
+                                    {{ overview: 'General', bookings: 'Reservas', rooms: 'Habitaciones' }[v]}
+                                </Button>
+                            ))}
+                        </div>
                     </div>
                 </div>
 
