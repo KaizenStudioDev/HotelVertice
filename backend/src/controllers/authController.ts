@@ -62,7 +62,7 @@ export const updateProfile = async (req: any, res: Response) => {
 
     try {
         const { data, error } = await supabase.auth.admin.updateUserById(req.user.id, {
-            data: { full_name: full_name.trim() }
+            user_metadata: { full_name: full_name.trim() }
         });
 
         if (error) throw error;

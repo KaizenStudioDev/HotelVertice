@@ -4,7 +4,9 @@
   "description": "",
   "type": "module",
   "scripts": {
-    "start": "tsx watch src/app.ts",
+    "dev": "tsx watch src/app.ts",
+    "build": "tsc --project tsconfig.json",
+    "start": "node dist/src/app.js",
     "seed": "tsx seed.ts",
     "test": "vitest run",
     "test:watch": "vitest",
