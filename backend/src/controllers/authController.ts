@@ -42,6 +42,7 @@ export const login = async (req: Request, res: Response) => {
 export const getProfile = async (req: any, res: Response) => {
     try {
         const { id, email, user_metadata } = req.user;
+        // user_metadata.role is already merged from profiles table by authenticate()
         res.json({
             id,
             email,
