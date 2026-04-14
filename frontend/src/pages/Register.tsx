@@ -34,7 +34,7 @@ const Register: React.FC = () => {
                     full_name: supabaseUser.user_metadata.full_name,
                     role: supabaseUser.user_metadata.role
                 };
-                login(session.access_token, userData);
+                login(session.access_token, session.refresh_token, userData);
                 addToast('¡Cuenta creada con éxito!', 'success');
                 
                 const from = (location.state as any)?.from || '/profile';
