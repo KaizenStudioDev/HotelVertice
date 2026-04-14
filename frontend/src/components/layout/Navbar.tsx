@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Menu, X, User, Settings, LogOut, Calendar } from 'lucide-react';
+import { Menu, X, User, Settings, LogOut, Calendar, ClipboardList } from 'lucide-react';
 
 const Navbar: React.FC = () => {
     const { user, logout } = useAuth();
@@ -47,6 +47,11 @@ const Navbar: React.FC = () => {
                             {user.role === 'admin' && (
                                 <Link to="/admin" className="p-2 bg-gold/10 rounded-lg text-gold hover:bg-gold/20 transition-colors" title="Admin Dashboard">
                                     <Settings size={18} />
+                                </Link>
+                            )}
+                            {user.role === 'receptionist' && (
+                                <Link to="/receptionist" className="p-2 bg-gold/10 rounded-lg text-gold hover:bg-gold/20 transition-colors" title="Panel Recepción">
+                                    <ClipboardList size={18} />
                                 </Link>
                             )}
                             <button
@@ -96,6 +101,12 @@ const Navbar: React.FC = () => {
                                 <Link to="/admin" onClick={close} className="py-3 flex items-center gap-3 text-gold hover:text-gold-light border-b border-white/10">
                                     <Settings size={18} />
                                     <span className="text-sm font-bold uppercase tracking-widest">Panel Admin</span>
+                                </Link>
+                            )}
+                            {user.role === 'receptionist' && (
+                                <Link to="/receptionist" onClick={close} className="py-3 flex items-center gap-3 text-gold hover:text-gold-light border-b border-white/10">
+                                    <ClipboardList size={18} />
+                                    <span className="text-sm font-bold uppercase tracking-widest">Panel Recepción</span>
                                 </Link>
                             )}
                             <button onClick={handleLogout} className="py-3 flex items-center gap-3 text-danger hover:text-red-400 text-sm font-bold uppercase tracking-widest mt-2">

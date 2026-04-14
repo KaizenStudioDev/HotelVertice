@@ -11,7 +11,7 @@ router.get('/', getReservations);
 router.post('/', createReservation);
 router.patch('/:id/cancel', cancelReservation);
 
-// Admin routes
-router.get('/admin/all', authorize(['admin']), getAllReservations);
+// Admin + Receptionist routes
+router.get('/admin/all', authorize(['admin', 'receptionist']), getAllReservations);
 
 export default router;
