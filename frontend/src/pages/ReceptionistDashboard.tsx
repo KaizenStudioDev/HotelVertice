@@ -42,18 +42,24 @@ const ReceptionistDashboard: React.FC = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            try {
-                const [roomsRes, resRes] = await Promise.all([
-                    roomService.getAll(),
-                    reservationService.getAllForAdmin(),
-                ]);
-                setRooms(roomsRes.data);
-                setReservations(resRes.data);
-            } catch {
-                addToast('Error al cargar datos', 'error');
-            } finally {
-                setLoading(false);
+            setLoading(true);
+            const [roomsRes, resRes] = await Promise.allSettled([
+                roomService.getAll(),
+                reservationService.getAllForAdmin(),
+            ]);
+
+            if (roomsRes.status === 'fulfilled') {
+                setRooms(roomsRes.value.data ?? []);
             }
+
+            if (resRes.status === 'fulfilled') {
+                setReservations(resRes.value.data ?? []);
+            } else {
+                const err = (resRes.reason as any)?.response?.data?.error;
+                addToast(`Error al cargar reservas: ${err || 'sin acceso'}`, 'error');
+            }
+
+            setLoading(false);
         };
         fetchData();
     }, []);

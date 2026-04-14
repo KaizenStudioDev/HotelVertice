@@ -24,18 +24,26 @@ const AdminDashboard: React.FC = () => {
     const [filterStatus, setFilterStatus] = useState('');
 
     const fetchData = async () => {
-        try {
-            const [roomsRes, resRes] = await Promise.all([
-                roomService.getAll(),
-                reservationService.getAllForAdmin(),
-            ]);
-            setRooms(roomsRes.data);
-            setReservations(resRes.data);
-        } catch {
-            addToast('Error al cargar datos del panel', 'error');
-        } finally {
-            setLoading(false);
+        setLoading(true);
+        const [roomsRes, resRes] = await Promise.allSettled([
+            roomService.getAll(),
+            reservationService.getAllForAdmin(),
+        ]);
+
+        if (roomsRes.status === 'fulfilled') {
+            setRooms(roomsRes.value.data ?? []);
+        } else {
+            addToast('Error al cargar habitaciones', 'error');
         }
+
+        if (resRes.status === 'fulfilled') {
+            setReservations(resRes.value.data ?? []);
+        } else {
+            const err = (resRes.reason as any)?.response?.data?.error;
+            addToast(`Error al cargar reservas: ${err || 'sin acceso'}`, 'error');
+        }
+
+        setLoading(false);
     };
 
     useEffect(() => { fetchData(); }, []);
