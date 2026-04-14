@@ -1,6 +1,7 @@
 {
   "name": "hotel-vertice",
   "private": true,
+  "type": "module",
   "engines": {
     "node": "20.x"
   }
