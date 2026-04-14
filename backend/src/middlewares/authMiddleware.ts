@@ -37,7 +37,8 @@ export const authorize = (roles: string[]) => {
             return res.status(401).json({ error: 'Authentication required' });
         }
 
-        const role = req.user.user_metadata?.role as string | undefined;
+        // Check user_metadata first (set during signup), then app_metadata (set via Supabase dashboard/admin API)
+        const role = (req.user.user_metadata?.role ?? req.user.app_metadata?.role) as string | undefined;
 
         if (!role || !roles.includes(role)) {
             return res.status(403).json({ error: 'Forbidden: Access denied' });
