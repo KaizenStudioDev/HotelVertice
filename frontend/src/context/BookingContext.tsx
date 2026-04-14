@@ -18,6 +18,7 @@ export interface BookingState {
     customerName?: string;
     customerEmail?: string;
     customerPhone?: string;
+    reservationId?: string;
 }
 
 interface BookingContextType {

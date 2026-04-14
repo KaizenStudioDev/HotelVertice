@@ -16,9 +16,13 @@ const PaymentConfirmation: React.FC = () => {
         navigate('/');
     };
 
+    const reservationCode = booking.reservationId
+        ? `HV-${booking.reservationId.slice(0, 8).toUpperCase()}`
+        : 'HV-29384-X';
+
     const handleDownloadPDF = () => {
         generateReservationPDF({
-            id: booking.roomId ? `HV-${booking.roomId}-${Date.now().toString().slice(-4)}` : 'HV-29384-X',
+            id: reservationCode,
             guestName: booking.customerName || 'Invitado',
             guestEmail: booking.customerEmail || 'invitado@example.com',
             roomName: booking.roomName || 'Habitación Seleccionada',
@@ -46,7 +50,7 @@ const PaymentConfirmation: React.FC = () => {
                     <div className="w-full bg-white p-6 rounded-2xl flex flex-col gap-4 border border-gray-medium shadow-sm">
                         <div className="flex justify-between items-center text-sm">
                             <span className="text-gray font-bold uppercase tracking-widest text-xs">CÓDIGO DE RESERVA</span>
-                            <span className="text-primary font-mono font-bold">HV-29384-X</span>
+                            <span className="text-primary font-mono font-bold">{reservationCode}</span>
                         </div>
                         <div className="flex justify-between items-center">
                             <span className="text-gray text-sm">Estado del Pago</span>

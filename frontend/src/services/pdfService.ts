@@ -22,7 +22,7 @@ export const generateReservationPDF = (data: PDFData) => {
   doc.setFillColor(...goldColor);
   doc.roundedRect(20, 15, 12, 12, 2, 2, 'F');
   doc.setTextColor(...primaryColor);
-  doc.setFont('playfair', 'bold');
+  doc.setFont('times', 'bold');
   doc.setFontSize(22);
   doc.text('HOTEL VÉRTICE', 38, 25);
 

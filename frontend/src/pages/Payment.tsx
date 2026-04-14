@@ -20,7 +20,7 @@ const Payment: React.FC = () => {
         e.preventDefault();
         setIsLoading(true);
         try {
-            await reservationService.create({
+            const res = await reservationService.create({
                 room_id: booking.roomId,
                 check_in: booking.checkIn,
                 check_out: booking.checkOut,
@@ -28,7 +28,7 @@ const Payment: React.FC = () => {
                 guest_name: booking.customerName,
                 guest_email: booking.customerEmail
             });
-            updateBooking({ totalPrice });
+            updateBooking({ totalPrice, reservationId: res.data?.id });
             addToast('¡Reserva confirmada con éxito!', 'success');
             navigate('/payment-confirmation');
         } catch (err: any) {
