@@ -59,7 +59,7 @@ interface SelectedEvent {
 const CalendarPage: React.FC = () => {
     const { user } = useAuth();
     const { addToast } = useToast();
-    const isAdmin = user?.role === 'admin';
+    const isStaff = user?.role === 'admin' || user?.role === 'receptionist';
 
     const [events, setEvents] = useState<ReservationEvent[]>([]);
     const [loading, setLoading] = useState(true);
@@ -70,7 +70,7 @@ const CalendarPage: React.FC = () => {
         const fetchData = async () => {
             try {
                 const [reservationsRes, roomsRes] = await Promise.all([
-                    isAdmin ? reservationService.getAllForAdmin() : reservationService.getAll(),
+                    isStaff ? reservationService.getAllForAdmin() : reservationService.getAll(),
                     roomService.getAll(),
                 ]);
 
@@ -103,7 +103,7 @@ const CalendarPage: React.FC = () => {
                 });
 
                 // Show maintenance rooms as background events (admin only)
-                const maintenanceEvents: ReservationEvent[] = isAdmin
+                const maintenanceEvents: ReservationEvent[] = isStaff
                     ? rooms
                         .filter((r) => r.status === 'maintenance')
                         .map((r) => ({
@@ -135,7 +135,7 @@ const CalendarPage: React.FC = () => {
         };
 
         fetchData();
-    }, [isAdmin]);
+    }, [isStaff]);
 
     const addOneDay = (dateStr: string): string => {
         const d = new Date(dateStr);
@@ -177,7 +177,7 @@ const CalendarPage: React.FC = () => {
                             Calendario de Disponibilidad
                         </h1>
                         <p className="text-gray text-sm">
-                            {isAdmin
+                            {isStaff
                                 ? 'Vista de todas las reservas y disponibilidad del hotel'
                                 : 'Vista de tus reservas activas'}
                         </p>
@@ -281,7 +281,7 @@ const CalendarPage: React.FC = () => {
                     <Info size={18} className="text-gold mt-0.5 shrink-0" />
                     <span>
                         Haz clic en cualquier evento del calendario para ver los detalles de la reserva.
-                        {isAdmin && ' Como administrador, ves todas las reservas del hotel.'}
+                        {isStaff && ' Como personal del hotel, ves todas las reservas.'}
                     </span>
                 </div>
             </div>
