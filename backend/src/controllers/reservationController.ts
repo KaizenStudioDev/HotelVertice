@@ -104,7 +104,8 @@ export const createReservation = async (req: any, res: Response) => {
 
 export const cancelReservation = async (req: any, res: Response) => {
     const { id } = req.params;
-    const isAdmin = req.user.user_metadata?.role === 'admin';
+    const role = req.user.user_metadata?.role;
+    const isStaff = role === 'admin' || role === 'receptionist';
 
     try {
         const { data: existing } = await supabase
@@ -115,8 +116,8 @@ export const cancelReservation = async (req: any, res: Response) => {
 
         if (!existing) return res.status(404).json({ error: 'Reservation not found' });
 
-        // Admins can cancel any reservation; users can only cancel their own
-        if (!isAdmin && existing.user_id !== req.user.id) {
+        // Staff (admin/receptionist) can cancel any reservation; users can only cancel their own
+        if (!isStaff && existing.user_id !== req.user.id) {
             return res.status(403).json({ error: 'Forbidden: Cannot cancel another user\'s reservation' });
         }
 
