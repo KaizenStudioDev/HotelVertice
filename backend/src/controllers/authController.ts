@@ -23,6 +23,19 @@ export const register = async (req: Request, res: Response) => {
     }
 };
 
+export const refreshToken = async (req: Request, res: Response) => {
+    const { refresh_token } = req.body;
+    if (!refresh_token) return res.status(400).json({ error: 'refresh_token required' });
+
+    try {
+        const { data, error } = await supabase.auth.refreshSession({ refresh_token });
+        if (error || !data.session) throw error || new Error('No session');
+        res.json({ data });
+    } catch (error: any) {
+        res.status(401).json({ error: error.message });
+    }
+};
+
 export const login = async (req: Request, res: Response) => {
     const { email, password } = req.body;
 

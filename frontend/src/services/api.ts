@@ -16,6 +16,34 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
+// Handle 401 globally: try to refresh token, otherwise redirect to login
+api.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        const originalRequest = error.config;
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
+            const refreshToken = localStorage.getItem('refresh_token');
+            if (refreshToken) {
+                try {
+                    const res = await api.post('/auth/refresh', { refresh_token: refreshToken });
+                    const { session } = res.data.data;
+                    localStorage.setItem('token', session.access_token);
+                    localStorage.setItem('refresh_token', session.refresh_token);
+                    originalRequest.headers.Authorization = `Bearer ${session.access_token}`;
+                    return api(originalRequest);
+                } catch {
+                    // refresh failed, fall through to logout
+                }
+            }
+            localStorage.removeItem('token');
+            localStorage.removeItem('refresh_token');
+            window.location.href = '/login';
+        }
+        return Promise.reject(error);
+    }
+);
+
 export const authService = {
     register: (data: any) => api.post('/auth/register', data),
     login: (data: any) => api.post('/auth/login', data),

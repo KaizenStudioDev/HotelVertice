@@ -25,10 +25,10 @@ const Login: React.FC = () => {
             const userData = {
                 id: supabaseUser.id,
                 email: supabaseUser.email,
-                full_name: supabaseUser.user_metadata.full_name,
-                role: supabaseUser.user_metadata.role
+                full_name: supabaseUser.user_metadata?.full_name || '',
+                role: supabaseUser.user_metadata?.role || 'guest'
             };
-            login(session.access_token, userData);
+            login(session.access_token, session.refresh_token, userData);
             addToast('¡Bienvenido de nuevo!', 'success');
             
             const from = (location.state as any)?.from || '/profile';

@@ -12,7 +12,7 @@ interface AuthContextType {
     user: User | null;
     loading: boolean;
     isAuthenticated: boolean;
-    login: (token: string, userData: User) => void;
+    login: (token: string, refreshToken: string, userData: User) => void;
     logout: () => void;
     updateUser: (updates: Partial<User>) => void;
 }
@@ -39,13 +39,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         initAuth();
     }, []);
 
-    const login = (token: string, userData: User) => {
+    const login = (token: string, refreshToken: string, userData: User) => {
         localStorage.setItem('token', token);
+        localStorage.setItem('refresh_token', refreshToken);
         setUser(userData);
     };
 
     const logout = () => {
         localStorage.removeItem('token');
+        localStorage.removeItem('refresh_token');
         setUser(null);
     };
 
