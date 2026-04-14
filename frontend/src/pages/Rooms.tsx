@@ -3,6 +3,7 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { Select } from '../components/ui/Select';
+import { Input } from '../components/ui/Input';
 import { useNavigate } from 'react-router-dom';
 import { useBooking, calcNights } from '../context/BookingContext';
 import { roomService } from '../services/api';
@@ -29,10 +30,32 @@ const Rooms: React.FC = () => {
     const [filterFloor, setFilterFloor] = useState('');
     const [filterView, setFilterView] = useState('');
 
+    // Local date state — initialised from BookingContext but editable inline
+    const [checkIn, setCheckIn] = useState(booking.checkIn);
+    const [checkOut, setCheckOut] = useState(booking.checkOut);
+
+    const today = new Date().toISOString().split('T')[0];
+
+    const handleCheckInChange = (val: string) => {
+        setCheckIn(val);
+        if (val >= checkOut) {
+            const next = new Date(val);
+            next.setDate(next.getDate() + 1);
+            setCheckOut(next.toISOString().split('T')[0]);
+        }
+        updateBooking({ checkIn: val });
+    };
+
+    const handleCheckOutChange = (val: string) => {
+        setCheckOut(val);
+        updateBooking({ checkOut: val });
+    };
+
     useEffect(() => {
         const fetchRooms = async () => {
+            setLoading(true);
             try {
-                const res = await roomService.getAll();
+                const res = await roomService.getAll({ check_in: checkIn, check_out: checkOut });
                 setRooms(res.data);
             } catch (err) {
                 addToast('Error al cargar habitaciones', 'error');
@@ -41,7 +64,14 @@ const Rooms: React.FC = () => {
             }
         };
         fetchRooms();
-    }, []);
+    }, [checkIn, checkOut]);
+
+    // Determines if a room is available for the currently selected dates.
+    // Prefers the server-computed field; falls back to static status.
+    const isRoomAvailable = (room: any): boolean => {
+        if ('is_available_for_dates' in room) return room.is_available_for_dates;
+        return room.status === 'available';
+    };
 
     const filteredRooms = rooms.filter(room => {
         return (filterFloor === '' || room.floor.toString() === filterFloor) &&
@@ -92,6 +122,22 @@ const Rooms: React.FC = () => {
                     </div>
 
                     <div className="flex flex-wrap gap-4 w-full md:w-auto">
+                        <Input
+                            label="Check-in"
+                            type="date"
+                            className="w-36"
+                            value={checkIn}
+                            min={today}
+                            onChange={(e) => handleCheckInChange(e.target.value)}
+                        />
+                        <Input
+                            label="Check-out"
+                            type="date"
+                            className="w-36"
+                            value={checkOut}
+                            min={checkIn}
+                            onChange={(e) => handleCheckOutChange(e.target.value)}
+                        />
                         <Select
                             label="Planta"
                             className="w-32"
@@ -166,8 +212,8 @@ const Rooms: React.FC = () => {
 
                                             <div className="flex flex-wrap gap-2 text-sm text-gray">
                                                 <span className="bg-gray-light px-2 py-1 rounded-md">👤 {room.room_types.capacity} Huespedes</span>
-                                                <Badge variant={room.status === 'available' ? 'success' : 'danger'}>
-                                                    {room.status === 'available' ? 'Disponible' : 'Ocupada'}
+                                                <Badge variant={isRoomAvailable(room) ? 'success' : 'danger'}>
+                                                    {isRoomAvailable(room) ? 'Disponible' : 'Ocupada'}
                                                 </Badge>
                                             </div>
 
@@ -177,10 +223,10 @@ const Rooms: React.FC = () => {
                                                     <span className="text-xs text-gray font-medium uppercase tracking-tighter">por noche</span>
                                                 </div>
                                                 <Button
-                                                    disabled={room.status !== 'available'}
+                                                    disabled={!isRoomAvailable(room)}
                                                     onClick={() => handleSelectRoom(room)}
                                                 >
-                                                    {room.status === 'available' ? 'Seleccionar' : 'No disponible'}
+                                                    {isRoomAvailable(room) ? 'Seleccionar' : 'No disponible'}
                                                 </Button>
                                             </div>
                                         </div>

@@ -25,7 +25,8 @@ export const authService = {
 };
 
 export const roomService = {
-    getAll: () => api.get('/rooms'),
+    getAll: (params?: { check_in?: string; check_out?: string }) =>
+        api.get('/rooms', { params }),
     getById: (id: number) => api.get(`/rooms/${id}`),
 };
 
