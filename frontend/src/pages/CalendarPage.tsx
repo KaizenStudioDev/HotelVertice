@@ -292,10 +292,10 @@ const CalendarPage: React.FC = () => {
                     className="fixed inset-0 bg-dark/50 z-50 flex items-center justify-center p-6"
                     onClick={() => setSelectedEvent(null)}
                 >
+                    <div onClick={(e: React.MouseEvent) => e.stopPropagation()}>
                     <Card
                         padding="lg"
                         className="w-full max-w-md shadow-2xl border-none"
-                        onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex flex-col gap-5">
                             {/* Modal Header */}
@@ -365,6 +365,7 @@ const CalendarPage: React.FC = () => {
                             </Button>
                         </div>
                     </Card>
+                    </div>
                 </div>
             )}
         </div>
