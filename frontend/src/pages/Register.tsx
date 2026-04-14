@@ -26,15 +26,12 @@ const Register: React.FC = () => {
         setIsLoading(true);
         try {
             const res = await authService.register({ full_name: fullName, email, password });
-            const { session, user: supabaseUser } = res.data.data;
+            const { session } = res.data.data;
             if (session) {
-                const userData = {
-                    id: supabaseUser.id,
-                    email: supabaseUser.email,
-                    full_name: supabaseUser.user_metadata.full_name,
-                    role: supabaseUser.user_metadata.role
-                };
-                login(session.access_token, session.refresh_token, userData);
+                localStorage.setItem('token', session.access_token);
+                localStorage.setItem('refresh_token', session.refresh_token);
+                const profileRes = await authService.getProfile();
+                login(session.access_token, session.refresh_token, profileRes.data);
                 addToast('¡Cuenta creada con éxito!', 'success');
                 
                 const from = (location.state as any)?.from || '/profile';

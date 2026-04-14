@@ -14,6 +14,7 @@ import UserProfile from './pages/UserProfile';
 import AdminDashboard from './pages/AdminDashboard';
 import ReceptionistDashboard from './pages/ReceptionistDashboard';
 import CalendarPage from './pages/CalendarPage';
+import ProtectedRoute from './components/layout/ProtectedRoute';
 import { BookingProvider } from './context/BookingContext';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
@@ -38,8 +39,15 @@ function App() {
                 <Route path="/payment" element={<Payment />} />
                 <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
                 <Route path="/profile" element={<UserProfile />} />
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/receptionist" element={<ReceptionistDashboard />} />
+                {/* Admin only — receptionist gets redirected to /receptionist */}
+                <Route element={<ProtectedRoute allowedRoles={['admin']} staffRedirect="/receptionist" />}>
+                    <Route path="/admin" element={<AdminDashboard />} />
+                </Route>
+
+                {/* Receptionist only — admin gets redirected to /admin */}
+                <Route element={<ProtectedRoute allowedRoles={['receptionist']} staffRedirect="/admin" />}>
+                    <Route path="/receptionist" element={<ReceptionistDashboard />} />
+                </Route>
                 <Route path="/calendar" element={<CalendarPage />} />
                 {/* Add more routes here in future phases */}
               </Route>

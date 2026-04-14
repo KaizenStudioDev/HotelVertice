@@ -21,14 +21,13 @@ const Login: React.FC = () => {
         setIsLoading(true);
         try {
             const res = await authService.login({ email, password });
-            const { session, user: supabaseUser } = res.data.data;
-            const userData = {
-                id: supabaseUser.id,
-                email: supabaseUser.email,
-                full_name: supabaseUser.user_metadata?.full_name || '',
-                role: supabaseUser.user_metadata?.role || 'guest'
-            };
-            login(session.access_token, session.refresh_token, userData);
+            const { session } = res.data.data;
+            // Store token first so getProfile() can use it
+            localStorage.setItem('token', session.access_token);
+            localStorage.setItem('refresh_token', session.refresh_token);
+            // Fetch profile from backend — role comes from profiles table, not user_metadata
+            const profileRes = await authService.getProfile();
+            login(session.access_token, session.refresh_token, profileRes.data);
             addToast('¡Bienvenido de nuevo!', 'success');
             
             const from = (location.state as any)?.from || '/profile';
