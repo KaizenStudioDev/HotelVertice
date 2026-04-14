@@ -23,30 +23,37 @@ const AdminDashboard: React.FC = () => {
     const [search, setSearch] = useState('');
     const [filterStatus, setFilterStatus] = useState('');
 
-    const fetchData = async () => {
-        setLoading(true);
-        const [roomsRes, resRes] = await Promise.allSettled([
-            roomService.getAll(),
-            reservationService.getAllForAdmin(),
-        ]);
+    useEffect(() => {
+        const controller = new AbortController();
 
-        if (roomsRes.status === 'fulfilled') {
-            setRooms(roomsRes.value.data ?? []);
-        } else {
-            addToast('Error al cargar habitaciones', 'error');
-        }
+        const fetchData = async () => {
+            setLoading(true);
+            const [roomsRes, resRes] = await Promise.allSettled([
+                roomService.getAll(),
+                reservationService.getAllForAdmin(),
+            ]);
 
-        if (resRes.status === 'fulfilled') {
-            setReservations(resRes.value.data ?? []);
-        } else {
-            const err = (resRes.reason as any)?.response?.data?.error;
-            addToast(`Error al cargar reservas: ${err || 'sin acceso'}`, 'error');
-        }
+            if (controller.signal.aborted) return;
 
-        setLoading(false);
-    };
+            if (roomsRes.status === 'fulfilled') {
+                setRooms(roomsRes.value.data ?? []);
+            } else {
+                addToast('Error al cargar habitaciones', 'error');
+            }
 
-    useEffect(() => { fetchData(); }, []);
+            if (resRes.status === 'fulfilled') {
+                setReservations(resRes.value.data ?? []);
+            } else {
+                const err = (resRes.reason as any)?.response?.data?.error;
+                addToast(`Error al cargar reservas: ${err || 'sin acceso'}`, 'error');
+            }
+
+            setLoading(false);
+        };
+
+        fetchData();
+        return () => controller.abort();
+    }, []);
 
     const handleCancel = async (id: string) => {
         if (!confirm('¿Seguro que quieres cancelar esta reserva?')) return;

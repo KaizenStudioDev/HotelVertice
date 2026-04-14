@@ -41,12 +41,16 @@ const ReceptionistDashboard: React.FC = () => {
     };
 
     useEffect(() => {
+        const controller = new AbortController();
+
         const fetchData = async () => {
             setLoading(true);
             const [roomsRes, resRes] = await Promise.allSettled([
                 roomService.getAll(),
                 reservationService.getAllForAdmin(),
             ]);
+
+            if (controller.signal.aborted) return;
 
             if (roomsRes.status === 'fulfilled') {
                 setRooms(roomsRes.value.data ?? []);
@@ -61,7 +65,9 @@ const ReceptionistDashboard: React.FC = () => {
 
             setLoading(false);
         };
+
         fetchData();
+        return () => controller.abort();
     }, []);
 
     const todayCheckIns = reservations.filter(
