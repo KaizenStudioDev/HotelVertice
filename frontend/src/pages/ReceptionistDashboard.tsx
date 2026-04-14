@@ -20,8 +20,25 @@ const ReceptionistDashboard: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [view, setView] = useState<'checkins' | 'reservations' | 'rooms'>('checkins');
+    const [cancellingId, setCancellingId] = useState<string | null>(null);
 
     const today = new Date().toISOString().split('T')[0];
+
+    const handleCancel = async (id: string) => {
+        if (!confirm('¿Seguro que quieres cancelar esta reserva?')) return;
+        setCancellingId(id);
+        try {
+            await reservationService.cancel(id);
+            setReservations(prev =>
+                prev.map(r => r.id === id ? { ...r, status: 'cancelled' } : r)
+            );
+            addToast('Reserva cancelada correctamente', 'success');
+        } catch {
+            addToast('Error al cancelar la reserva', 'error');
+        } finally {
+            setCancellingId(null);
+        }
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -190,12 +207,13 @@ const ReceptionistDashboard: React.FC = () => {
                                             <th className="px-6 py-4">Check-out</th>
                                             <th className="px-6 py-4 text-right">Total</th>
                                             <th className="px-6 py-4 text-center">Estado</th>
+                                            <th className="px-6 py-4 text-center">Acción</th>
                                         </tr>
                                     </thead>
                                     <tbody className="text-sm divide-y divide-gray-light">
                                         {filteredReservations.length === 0 ? (
                                             <tr>
-                                                <td colSpan={6} className="px-6 py-16 text-center text-gray italic">
+                                                <td colSpan={7} className="px-6 py-16 text-center text-gray italic">
                                                     No se encontraron reservas.
                                                 </td>
                                             </tr>
@@ -217,6 +235,20 @@ const ReceptionistDashboard: React.FC = () => {
                                                     <Badge variant={res.status === 'confirmed' ? 'success' : res.status === 'cancelled' ? 'danger' : 'info'}>
                                                         {STATUS_LABEL[res.status] ?? res.status}
                                                     </Badge>
+                                                </td>
+                                                <td className="px-6 py-4 text-center">
+                                                    {res.status === 'confirmed' ? (
+                                                        <Button
+                                                            variant="danger"
+                                                            size="sm"
+                                                            disabled={cancellingId === res.id}
+                                                            onClick={() => handleCancel(res.id)}
+                                                        >
+                                                            {cancellingId === res.id ? 'Cancelando...' : 'Cancelar'}
+                                                        </Button>
+                                                    ) : (
+                                                        <span className="text-xs text-gray">—</span>
+                                                    )}
                                                 </td>
                                             </tr>
                                         ))}
