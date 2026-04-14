@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 interface PDFData {
   id: string;
@@ -12,11 +12,11 @@ interface PDFData {
 }
 
 export const generateReservationPDF = (data: PDFData) => {
-  const doc = new jsPDF() as any;
+  const doc = new jsPDF();
 
   // Header Colors & Styling
-  const primaryColor = [13, 27, 42]; // Hotel Primary
-  const goldColor = [201, 173, 116]; // Hotel Gold
+  const primaryColor: [number, number, number] = [13, 27, 42];
+  const goldColor: [number, number, number] = [201, 173, 116];
 
   // Logo Placeholder / Text Brand
   doc.setFillColor(...goldColor);
@@ -43,8 +43,8 @@ export const generateReservationPDF = (data: PDFData) => {
   doc.setFont('helvetica', 'normal');
   doc.text(`Fecha de emisión: ${new Date().toLocaleDateString()}`, 150, 50);
 
-  // Tables for Details
-  doc.autoTable({
+  // Guest details table
+  autoTable(doc, {
     startY: 60,
     head: [['Detalles del Huésped', '']],
     body: [
@@ -53,11 +53,12 @@ export const generateReservationPDF = (data: PDFData) => {
     ],
     theme: 'plain',
     headStyles: { textColor: goldColor, fontStyle: 'bold', fontSize: 12 },
-    columnStyles: { 0: { fontStyle: 'bold', width: 50 } },
+    columnStyles: { 0: { fontStyle: 'bold', cellWidth: 50 } },
   });
 
-  doc.autoTable({
-    startY: doc.lastAutoTable.finalY + 10,
+  // Room details table
+  autoTable(doc, {
+    startY: (doc as any).lastAutoTable.finalY + 10,
     head: [['Detalles de la Habitación', '']],
     body: [
       ['Habitación:', data.roomName],
@@ -66,11 +67,11 @@ export const generateReservationPDF = (data: PDFData) => {
     ],
     theme: 'plain',
     headStyles: { textColor: goldColor, fontStyle: 'bold', fontSize: 12 },
-    columnStyles: { 0: { fontStyle: 'bold', width: 50 } },
+    columnStyles: { 0: { fontStyle: 'bold', cellWidth: 50 } },
   });
 
   // Final Price Section
-  const finalY = doc.lastAutoTable.finalY + 20;
+  const finalY = (doc as any).lastAutoTable.finalY + 20;
   doc.setFillColor(...primaryColor);
   doc.rect(130, finalY - 10, 60, 20, 'F');
   doc.setTextColor(255, 255, 255);
@@ -79,7 +80,7 @@ export const generateReservationPDF = (data: PDFData) => {
   doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(...goldColor);
-  doc.text(`$${data.totalPrice}`, 135, finalY + 7);
+  doc.text(`$${data.totalPrice.toLocaleString()}`, 135, finalY + 7);
 
   // Footer
   doc.setTextColor(150, 150, 150);
